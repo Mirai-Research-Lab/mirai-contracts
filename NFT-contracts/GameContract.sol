@@ -17,6 +17,7 @@ contract GameContract{
     uint256 constant DECIMALS = 100000000000000000;
     // Variables
     address private s_owner;
+    uint256 private s_numberOfPlayers;
     mapping(address => PlayerInfo) private s_addressToToken;
     MiraiToken private s_token;
     uint256 immutable i_initialTokenSupply;
@@ -51,6 +52,7 @@ contract GameContract{
         i_initialTokenSupply = initialTokenSupply * DECIMALS;
         i_tokenNeededToPlay = tokenNeededToPlay * DECIMALS;
         s_priceFeed = AggregatorV3Interface(priceFeed);
+        s_numberOfPlayers = 0;
     }
     
     // Main functions
@@ -61,6 +63,7 @@ contract GameContract{
         s_token.transfer(signer, 20 * DECIMALS);
         s_addressToToken[signer].tokenAmount = 20 * DECIMALS;
         s_addressToToken[signer].id = 1;
+        s_numberOfPlayers = s_numberOfPlayers+1;
         emit PlayerSigned(signer);
     }
 
@@ -87,9 +90,10 @@ contract GameContract{
         emit TokenBought(signer, tokenToTransfer);
     }
 
-    function distributeToken(address winner1, address winner2, address winner3) payable{
+    function distributeToken(address winner1, address winner2, address winner3) public payable{
         uint256 totalAmountHeldByContract = address(this).balance;
         uint256 totalAmountToDistribute = (totalAmountHeldByContract * 4)/5;
+        uint256 amountCreditedToOwner = totalAmountHeldByContract-totalAmountToDistribute;
         uint256 amountCreditedToFirst = totalAmountToDistribute/2;
         uint256 amountCreditedToSecond = (totalAmountToDistribute * 3)/10;
         uint256 amountCreditedToThird = (totalAmountToDistribute) - amountCreditedToFirst - amountCreditedToSecond;
@@ -109,6 +113,27 @@ contract GameContract{
                 revert GameContract__AmountTransferFailed();
             }
         } 
+        (bool callSuccess, ) = payable(s_owner).call{value:amountCreditedToOwner}();
+        if(!callSuccess){
+            revert GameContract__AmountTransferFailed();
+        }
         emit WinnersPaid(addresses, prizes);
+    }
+
+    // Getter functions 
+    function getPlayerInfo(address signer) view returns(PlayerInfo playerInfo){
+        return s_addressToToken[signer];
+    }
+
+    function getTokenNeededToPlay() view returns (uint256 amount){
+        return i_tokenNeededToPlay;
+    }
+
+    function getInitialTokenGiven() view returns (uint256 amount){
+        return i_initialTokenSupply;
+    }
+
+    function getNumberOfPlayers() view returns (uint256 number){
+        return s_numberOfPlayers;
     }
 }
