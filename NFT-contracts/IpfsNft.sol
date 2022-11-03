@@ -49,7 +49,10 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         uint32 callbackGasLimit,
         string[3] memory charTokenURIs,
         uint256 mintFee
-    ) VRFConsumerBaseV2(vrfCoordinatorV2Address) ERC721("MobiRandomNFT", "MRN") {
+    )
+        VRFConsumerBaseV2(vrfCoordinatorV2Address)
+        ERC721("MobiRandomNFT", "MRN")
+    {
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2Address);
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
@@ -64,10 +67,14 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         return s_isinitialized;
     }
 
-    function requestNft() public payable returns (uint256 requestId) {
-        if (msg.value < i_mintFee) {
-            revert IpfsNFT__NeedMoreEthSent();
-        }
+    function requestNft(address player)
+        public
+        payable
+        returns (uint256 requestId)
+    {
+        // if (msg.value < i_mintFee) {
+        //     revert IpfsNFT__NeedMoreEthSent();
+        // }
         requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane,
             i_subscriptionId,
@@ -75,11 +82,14 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
             i_callbackGasLimit,
             NUM_WORDS
         );
-        s_requestIdToOwner[requestId] = msg.sender;
-        emit Nft_Requested(requestId, msg.sender);
+        s_requestIdToOwner[requestId] = player;
+        emit Nft_Requested(requestId, player);
     }
 
-    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords) internal override {
+    function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
+        internal
+        override
+    {
         address charOwner = s_requestIdToOwner[requestId];
         uint256 newTokenId = s_tokenCounter;
         //get moddedRandom Number to get a random NFT
@@ -110,12 +120,19 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         return chanceArray;
     }
 
-    function getCharFromModdedRng(uint256 moddedRng) public pure returns (Rarity) {
+    function getCharFromModdedRng(uint256 moddedRng)
+        public
+        pure
+        returns (Rarity)
+    {
         uint256 cumulativeSum = 0;
         uint256[3] memory chanceArray = getChanceArray();
         for (uint256 i = 0; i < chanceArray.length; i++) {
             //First checking if between 0 or 10, then 10 or 40 and finally 40 or 100
-            if (moddedRng >= cumulativeSum && moddedRng < cumulativeSum + chanceArray[i]) {
+            if (
+                moddedRng >= cumulativeSum &&
+                moddedRng < cumulativeSum + chanceArray[i]
+            ) {
                 return Rarity(i);
             }
             cumulativeSum = cumulativeSum + chanceArray[i];
