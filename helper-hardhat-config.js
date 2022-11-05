@@ -18,8 +18,8 @@ const networkConfig = {
 };
 const DECIMALS = "18";
 const INITIAL_PRICE = "100000000000000000000";
-const INITIAL_TOKEN_SUPPLY = "100000";
-const TOKEN_NEEDED_TO_PLAY = "20";
+const INITIAL_TOKEN_SUPPLY = "1000000000000000000000000";
+const TOKEN_NEEDED_TO_PLAY = "10";
 
 const developmentChains = ["hardhat", "localhost"];
 module.exports = {
