@@ -27,4 +27,6 @@ module.exports = {
   developmentChains,
   DECIMALS,
   INITIAL_PRICE,
+  INITIAL_TOKEN_SUPPLY,
+  TOKEN_NEEDED_TO_PLAY,
 };
