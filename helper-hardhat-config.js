@@ -2,8 +2,7 @@ const networkConfig = {
   31337: {
     name: "localhost",
     ethUsdPriceFeed: "PRICE_FEED_ADDRESS_AFTER_LOCAL_DEPLOYMENT",
-    gasLane:
-      "HARDHAT_GAS_LANE_ADDRESS",
+    gasLane: "HARDHAT_GAS_LANE_ADDRESS",
     mintFee: "MINT_FEE",
     callbackGasLimit: "500000",
     5: {
