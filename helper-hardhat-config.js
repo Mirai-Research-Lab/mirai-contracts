@@ -8,7 +8,7 @@ const networkConfig = {
     5: {
       name: "goerli",
       ethUsdPriceFeed: "PRICE_FEED_ADDRESS",
-      vrfCoordinatorV2: "VRFCOORDINATOR_ADDRESS",
+      vrfCoordinatorV2: "0x2Ca8E0C643bDe4C2E08ab1fA0da3401AdAD7734D",
       gasLane: "GOERLI_GAS_LANE_ADDRESS",
       callbackGasLimit: "500000",
       mintFee: "MINT_FEE",

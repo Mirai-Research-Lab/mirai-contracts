@@ -20,6 +20,7 @@ contract GameContract {
   uint256 private s_numberOfPlayers;
   mapping(address => PlayerInfo) private s_addressToToken;
   MiraiToken private s_token;
+  IpfsNFT private s_nft;
   uint256 immutable i_initialTokenSupply;
   uint256 immutable i_tokenNeededToPlay;
   AggregatorV3Interface internal s_priceFeed;
@@ -32,9 +33,9 @@ contract GameContract {
   error GameContract__PlayerAlreadyExists();
   error GameContract__NotEnoughTokens(address signer);
   error GameContract__AmountTransferFailed();
-
+  error GameContract__NoEthSent();
   modifier onlyOwner() {
-    require(msg.sender == owner, "You are not the owner");
+    require(msg.sender == s_owner, "You are not the owner");
     _;
   }
 
@@ -43,7 +44,7 @@ contract GameContract {
     uint256 tokenNeededToPlay,
     address priceFeed
   ) {
-    owner = msg.sender;
+    s_owner = msg.sender;
     i_initialTokenSupply = initialTokenSupply * DECIMALS;
     i_tokenNeededToPlay = tokenNeededToPlay * DECIMALS;
     s_priceFeed = AggregatorV3Interface(priceFeed);
@@ -66,21 +67,21 @@ contract GameContract {
     if (s_token.balanceOf(signer) < i_tokenNeededToPlay) {
       return 0;
     }
-    s_token._burn(signer, i_tokenNeededToPlay);
+    s_token.transferFrom(signer, s_owner, i_tokenNeededToPlay);
     s_addressToToken[signer].tokenAmount =
       s_addressToToken[signer].tokenAmount -
-      tokenNeededToPlay;
+      i_tokenNeededToPlay;
     emit GameStarted(signer, s_addressToToken[signer].tokenAmount);
     return 1;
   }
 
   function buyToken(address signer) public payable {
-    uint256 tokenToTransfer = msg.value.getConversionRate(priceFeed) * DECIMALS;
-    (bool callSuccess, ) = payable(this).call{ value: msg.value }();
-    if (!callSuccess) {
-      revert GameContract__AmountTransferFailed();
+    uint256 tokenToTransfer = msg.value.getConversionRate(s_priceFeed) *
+      DECIMALS;
+    if (tokenToTransfer == 0) {
+      revert GameContract__NoEthSent();
     }
-    s_token._transfer(owner, signer, tokenToTransfer);
+    s_token.transferFrom(s_owner, signer, tokenToTransfer);
     s_addressToToken[signer].tokenAmount =
       s_addressToToken[signer].tokenAmount +
       tokenToTransfer;
@@ -111,16 +112,14 @@ contract GameContract {
     prizes[1] = amountCreditedToSecond;
     prizes[2] = amountCreditedToThird;
     for (uint16 i = 0; i < 3; i++) {
-      (bool callSuccess, ) = payable(addresses[i]).call{ value: prizes[i] }();
+      (bool callSuccess, ) = payable(addresses[i]).call{ value: prizes[i] }("");
       if (!callSuccess) {
         revert GameContract__AmountTransferFailed();
       }
-
-      requestNft(addresses[i]);
     }
     (bool callSuccess, ) = payable(s_owner).call{
       value: amountCreditedToOwner
-    }();
+    }("");
     if (!callSuccess) {
       revert GameContract__AmountTransferFailed();
     }
@@ -128,19 +127,21 @@ contract GameContract {
   }
 
   // Getter functions
-  function getPlayerInfo(address signer) view returns (PlayerInfo playerInfo) {
+  function getPlayerInfo(
+    address signer
+  ) public view returns (PlayerInfo memory playerInfo) {
     return s_addressToToken[signer];
   }
 
-  function getTokenNeededToPlay() view returns (uint256 amount) {
+  function getTokenNeededToPlay() public view returns (uint256 amount) {
     return i_tokenNeededToPlay;
   }
 
-  function getInitialTokenGiven() view returns (uint256 amount) {
+  function getInitialTokenGiven() public view returns (uint256 amount) {
     return i_initialTokenSupply;
   }
 
-  function getNumberOfPlayers() view returns (uint256 number) {
+  function getNumberOfPlayers() public view returns (uint256 number) {
     return s_numberOfPlayers;
   }
 }
