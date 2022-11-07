@@ -19,6 +19,7 @@ const networkConfig = {
 const DECIMALS = "18";
 const INITIAL_PRICE = "100000000000000000000";
 const INITIAL_TOKEN_SUPPLY = "1000000000000000000000000";
+const TOKEN_AMOUNT_GIVEN_TO_PLAYER = "20";
 const TOKEN_NEEDED_TO_PLAY = "10";
 
 const developmentChains = ["hardhat", "localhost"];
@@ -28,5 +29,6 @@ module.exports = {
   DECIMALS,
   INITIAL_PRICE,
   INITIAL_TOKEN_SUPPLY,
+  TOKEN_AMOUNT_GIVEN_TO_PLAYER,
   TOKEN_NEEDED_TO_PLAY,
 };
