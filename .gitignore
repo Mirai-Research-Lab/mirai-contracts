@@ -2,3 +2,5 @@ node_modules
 build
 dist
 .env
+artifacts/
+cache/
