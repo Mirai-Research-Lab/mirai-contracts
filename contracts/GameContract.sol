@@ -4,7 +4,6 @@ pragma solidity ^0.8.5;
 import "./MiraiToken.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "./PriceConvertor.sol";
-import "./IpfsNFT.sol";
 
 contract GameContract {
   using PriceConverter for uint256;
@@ -20,7 +19,6 @@ contract GameContract {
   uint256 private s_numberOfPlayers;
   mapping(address => PlayerInfo) private s_addressToToken;
   MiraiToken private s_token;
-  IpfsNFT private s_nft;
   uint256 immutable i_initialTokenSupply;
   uint256 immutable i_tokenNeededToPlay;
   AggregatorV3Interface internal s_priceFeed;
