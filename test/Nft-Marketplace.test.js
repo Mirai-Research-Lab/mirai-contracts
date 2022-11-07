@@ -1,6 +1,6 @@
 const { assert, expect } = require("chai")
 const { network, deployments, ethers } = require("hardhat")
-const { developmentChains } = require("../../helper-hardhat-config")
+const { developmentChains } = require("../helper-hardhat-config")
 
 !developmentChains.includes(network.name)
     ? describe.skip
@@ -14,9 +14,9 @@ const { developmentChains } = require("../../helper-hardhat-config")
               deployer = accounts[0]
               user = accounts[1]
               await deployments.fixture(["all"])
-              nftMarketplaceContract = await ethers.getContract("Nft-Marketplace")
+              nftMarketplaceContract = await ethers.getContract("Marketplace")
               nftMarketplace = nftMarketplaceContract.connect(deployer)
-              IpfsNftContract = await ethers.getContract("IpfsNft")
+              IpfsNftContract = await ethers.getContract("IpfsNFT")
               IpfsNft = IpfsNftContract.connect(deployer)
           })
 

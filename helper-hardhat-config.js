@@ -21,7 +21,7 @@ const INITIAL_PRICE = "100000000000000000000";
 const INITIAL_TOKEN_SUPPLY = "1000000000000000000000000";
 const TOKEN_AMOUNT_GIVEN_TO_PLAYER = "20";
 const TOKEN_NEEDED_TO_PLAY = "10";
-
+const charTokenURIs=["https://ipfs.io/ipfs/QmcmUUQ1KPWtdzKJTaFFg5Y56wxWZRMiC1dapysW6grRe7","https://ipfs.io/ipfs/QmcmUUQ1KPWtdzKJTaFFg5Y56wxWZRMiC1dapysW6grRe7","https://ipfs.io/ipfs/QmcmUUQ1KPWtdzKJTaFFg5Y56wxWZRMiC1dapysW6grRe7"]
 const developmentChains = ["hardhat", "localhost"];
 module.exports = {
   networkConfig,
@@ -31,4 +31,5 @@ module.exports = {
   INITIAL_TOKEN_SUPPLY,
   TOKEN_AMOUNT_GIVEN_TO_PLAYER,
   TOKEN_NEEDED_TO_PLAY,
+  charTokenURIs
 };
