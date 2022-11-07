@@ -91,8 +91,11 @@ module.exports = {
         version: "0.8.7",
       },
       {
+        version: "0.8.5",
+      },
+      {
         version: "0.8.9",
-      }
+      },
     ],
   },
   mocha: {

@@ -11,27 +11,21 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { deployer } = await getNamedAccounts();
   const { deploy, log } = deployments;
   const chainId = network.config.chainId;
+  let MockV3Aggregator;
+  let MockV3AggregatorAddress;
 
   if (chainId == 31337) {
-    // create VRFV2 Subscription
-    vrfCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
-    vrfCoordinatorV2Address = vrfCoordinatorV2Mock.address;
-    const transactionResponse = await vrfCoordinatorV2Mock.createSubscription();
-    const transactionReceipt = await transactionResponse.wait();
-    subscriptionId = transactionReceipt.events[0].args.subId;
-    // Fund the subscription
-    // Our mock makes it so we don't actually have to worry about sending fund
-    await vrfCoordinatorV2Mock.fundSubscription(subscriptionId, FUND_AMOUNT);
+    MockV3Aggregator = await ethers.getContract("MockV3Aggregator");
+    MockV3AggregatorAddress = MockV3Aggregator.address;
   } else {
-    vrfCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2;
-    subscriptionId = networkConfig[chainId].subscriptionId;
+    MockV3AggregatorAddress = networkConfig[chainId].MockV3AggregatorAddress;
   }
 
   console.log("----Deploying----");
   const marketplace = await deploy("GameContract", {
     from: deployer,
     log: true,
-    args: [INITIAL_TOKEN_SUPPLY, TOKEN_NEED_TO_PLAY],
+    args: [INITIAL_TOKEN_SUPPLY, TOKEN_NEED_TO_PLAY, MockV3AggregatorAddress],
     waitConfimations: 1,
   });
 
