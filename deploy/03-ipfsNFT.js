@@ -1,5 +1,9 @@
 const { network, ethers } = require("hardhat");
-const { developmentChains,charTokenURIs ,networkConfig} = require("../helper-hardhat-config");
+const {
+  developmentChains,
+  charTokenURIs,
+  networkConfig,
+} = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 require("dotenv").config();
 
@@ -16,21 +20,25 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   } else {
     VRFCoordinatorV2Address = networkConfig[chainId].vrfCoordinatorV2;
   }
-  const {subscriptionId,gasLane,callbackGasLimit,maxNFT}=process.env;
+  const { subscriptionId, gasLane, callbackGasLimit, maxNFT } = process.env;
   console.log("----Deploying----");
   const IpfsNFTContract = await deploy("IpfsNFT", {
     from: deployer,
     log: true,
     args: [
-        VRFCoordinatorV2Address,
-        subscriptionId.toString(),
-        gasLane.toString(),
-        callbackGasLimit.toString(),
-        maxNFT.toString(),
-        charTokenURIs
+      VRFCoordinatorV2Address,
+      subscriptionId.toString(),
+      gasLane.toString(),
+      callbackGasLimit.toString(),
+      maxNFT.toString(),
+      charTokenURIs,
     ],
     waitConfimations: 1,
   });
+  const consumerTx = await VRFCoordinatorV2.addConsumer(
+    subscriptionId,
+    IpfsNFTContract.address
+  );
 
   console.log("----Deployment Was Successful----");
   if (!developmentChains.includes(network.name)) {
