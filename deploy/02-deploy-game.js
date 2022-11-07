@@ -3,8 +3,8 @@ const { developmentChains } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
 const {
-  INITIAL_TOKEN_SUPPLY,
   TOKEN_NEED_TO_PLAY,
+  TOKEN_AMOUNT_GIVEN_TO_PLAYER,
 } = require("../helper-hardhat-config");
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
@@ -25,7 +25,11 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const marketplace = await deploy("GameContract", {
     from: deployer,
     log: true,
-    args: [INITIAL_TOKEN_SUPPLY, TOKEN_NEED_TO_PLAY, MockV3AggregatorAddress],
+    args: [
+      TOKEN_AMOUNT_GIVEN_TO_PLAYER,
+      TOKEN_NEED_TO_PLAY,
+      MockV3AggregatorAddress,
+    ],
     waitConfimations: 1,
   });
 
