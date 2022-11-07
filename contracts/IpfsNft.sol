@@ -32,7 +32,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
   //Events
   event Nft_Requested(uint256 indexed requestId, address requester);
 
-  event Nft_Minted( address indexed minter);
+  event Nft_Minted(address indexed minter);
 
   constructor(
     address vrfCoordinatorV2Address,
@@ -40,7 +40,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     bytes32 gasLane,
     uint32 callbackGasLimit,
     uint16 maxNFT,
-    string[3] memory charTokenURIs,
+    string[3] memory charTokenURIs
   ) VRFConsumerBaseV2(vrfCoordinatorV2Address) ERC721("MobiRandomNFT", "MRN") {
     i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinatorV2Address);
     i_subscriptionId = subscriptionId;
@@ -78,10 +78,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     uint256 moddedRng = randomWords[0] % i_maxNFT;
     s_tokenCounter = s_tokenCounter + 1;
     _safeMint(charOwner, newTokenId);
-    _setTokenURI(
-      newTokenId,
-      s_TokenURIs[uint256(moddedRng)]
-    );
+    _setTokenURI(newTokenId, s_TokenURIs[uint256(moddedRng)]);
     emit Nft_Minted(charOwner);
   }
 
