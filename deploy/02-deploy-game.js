@@ -1,9 +1,9 @@
-const { network } = require("hardhat");
+const { network, ethers } = require("hardhat");
 const { developmentChains } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
 const {
-  TOKEN_NEED_TO_PLAY,
+  TOKEN_NEEDED_TO_PLAY,
   TOKEN_AMOUNT_GIVEN_TO_PLAYER,
 } = require("../helper-hardhat-config");
 
@@ -22,12 +22,12 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   }
 
   console.log("----Deploying----");
-  const marketplace = await deploy("GameContract", {
+  const gameContract = await deploy("GameContract", {
     from: deployer,
     log: true,
     args: [
-      TOKEN_AMOUNT_GIVEN_TO_PLAYER,
-      TOKEN_NEED_TO_PLAY,
+      Number(TOKEN_AMOUNT_GIVEN_TO_PLAYER),
+      Number(TOKEN_NEEDED_TO_PLAY),
       MockV3AggregatorAddress,
     ],
     waitConfimations: 1,
@@ -36,7 +36,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   console.log("----Deployment Was Successful----");
   if (!developmentChains.includes(network.name)) {
     console.log("-----Verifying-----");
-    verify(marketplace.address, []);
+    verify(gameContract.address, []);
     console.log("----Verification was Successful----");
   }
 };
