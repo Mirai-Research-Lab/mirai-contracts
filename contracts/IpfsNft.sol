@@ -30,10 +30,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     uint256 private s_tokenCounter;
 
     //Events
-    event Nft_Requested(
-        uint256 indexed tokenId
-        address indexed requester,
-    );
+    event Nft_Requested(uint256 indexed tokenId, address indexed requester);
 
     event Nft_Minted(address indexed minter);
 
