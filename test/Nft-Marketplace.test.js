@@ -165,7 +165,6 @@ const { developmentChains } = require("../helper-hardhat-config");
           const { gasUsed, effectiveGasPrice } = transactionReceipt;
           const gasCost = gasUsed.mul(effectiveGasPrice);
           const deployerBalanceAfter = await deployer.getBalance();
-
           assert(
             deployerBalanceAfter.add(gasCost).toString() ==
               deployerProceedsBefore.add(deployerBalanceBefore).toString()

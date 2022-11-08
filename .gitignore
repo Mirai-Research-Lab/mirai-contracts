@@ -4,3 +4,4 @@ dist
 .env
 artifacts
 cache
+deployments/
