@@ -30,7 +30,16 @@ const { developmentChains } = require("../../helper-hardhat-config");
           expect(await IpfsNft.requestNft()).to.emit(IpfsNft, "NftRequested");
         });
         it("Should increment the token counter", async function () {
-          await IpfsNft.requestNft();
+          const tx = await IpfsNft.requestNft();
+          const receipt = await tx.wait(1);
+          const receiptId = receipt.events[1].args[2];
+
+          const tx2 = await VRFCoordinatorV2Mock.fulfillRandomWords(
+            receiptId,
+            IpfsNft.address
+          );
+          await tx2.wait(1);
+
           assert.equal((await IpfsNft.getTokenCounter()).toString(), "1");
         });
       });
