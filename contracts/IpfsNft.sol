@@ -20,6 +20,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     uint16 private immutable i_maxNFT;
     uint16 private constant REQUEST_CONFIRMATIONS = 1;
     uint32 private constant NUM_WORDS = 1;
+    uint256 private s_moddedRng;
     bool private s_isinitialized = false;
     string[] internal s_TokenURIs;
 
@@ -30,7 +31,11 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     uint256 private s_tokenCounter;
 
     //Events
-    event Nft_Requested(uint256 indexed tokenId, address indexed requester);
+    event Nft_Requested(
+        uint256 indexed tokenId,
+        address indexed requester,
+        uint256 indexed requestId
+    );
 
     event Nft_Minted(address indexed minter);
 
@@ -69,7 +74,15 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
             NUM_WORDS
         );
         s_requestIdToOwner[requestId] = msg.sender;
-        emit Nft_Requested(tokenId, msg.sender);
+        emit Nft_Requested(tokenId, msg.sender, requestId);
+    }
+
+    function staticMint() internal {
+        uint256 tokenId = s_tokenCounter;
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, s_TokenURIs[0]);
+        s_tokenCounter++;
+        // emit Nft_Requested(tokenId, msg.sender);
     }
 
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
@@ -78,11 +91,11 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     {
         address charOwner = s_requestIdToOwner[requestId];
         uint256 newTokenId = s_tokenCounter;
-        //get moddedRandom Number to get a random NFT
-        uint256 moddedRng = randomWords[0] % i_maxNFT;
-        s_tokenCounter = s_tokenCounter + 1;
+        // get moddedRandom Number to get a random NFT
+        s_moddedRng = randomWords[0] % i_maxNFT;
         _safeMint(charOwner, newTokenId);
-        _setTokenURI(newTokenId, s_TokenURIs[uint256(moddedRng)]);
+        _setTokenURI(newTokenId, s_TokenURIs[uint256(s_moddedRng)]);
+        s_tokenCounter = s_tokenCounter + 1;
         emit Nft_Minted(charOwner);
     }
 
@@ -92,5 +105,9 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
 
     function getTokenCounter() public view returns (uint256) {
         return s_tokenCounter;
+    }
+
+    function getLastRange() public view returns (uint256) {
+        return s_moddedRng;
     }
 }
