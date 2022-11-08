@@ -3,5 +3,6 @@ build
 dist
 .env
 artifacts
+deployments/
 cache
 deployments/
