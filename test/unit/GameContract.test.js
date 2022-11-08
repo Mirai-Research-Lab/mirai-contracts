@@ -11,16 +11,21 @@ const {
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("Game Unit Tests", function () {
-      let gameContract, IpfsNft, IpfsNftContract, MIRAI_PER_ETH;
-      const PRICE = ethers.utils.parseEther("1");
-      const TOKEN_ID = 0;
-      const ETH = "1";
+      let gameContract,
+        IpfsNft,
+        IpfsNftContract,
+        MIRAI_PER_ETH,
+        player1,
+        player2,
+        player3;
+
+      const ETH = ethers.utils.parseEther("1");
       const TOKEN_DECIMALS = 10 ** DECIMALS;
 
       beforeEach(async () => {
         accounts = await ethers.getSigners();
-        deployer = accounts[0];
-        user = accounts[1];
+        [deployer, user, player1, player2, player3] = accounts;
+
         await deployments.fixture(["all"]);
 
         gameContract = await ethers.getContract("GameContract");
@@ -36,14 +41,14 @@ const {
 
       describe("buyToken", function () {
         it("price should be above zero", async function () {
-          const TOKEN_TO_BUY = "0";
+          const TOKEN_TO_BUY = ethers.utils.parseEther("0");
           await expect(
             game.buyToken(user.address, { value: TOKEN_TO_BUY })
           ).to.be.revertedWith("GameContract__NoEthSent");
         });
 
         it("should buy token", async function () {
-          const TOKEN_TO_BUY = "1";
+          const TOKEN_TO_BUY = ethers.utils.parseEther("1");
 
           expect(
             await game.buyToken(user.address, { value: TOKEN_TO_BUY })
@@ -51,26 +56,83 @@ const {
         });
 
         it("should update token balance", async function () {
-          const TOKEN_TO_BUY = "1";
+          const TOKEN_TO_BUY = ethers.utils.parseEther("1");
           const buyTx = await game.buyToken(user.address, {
             value: TOKEN_TO_BUY,
           });
           const buyReceipt = await buyTx.wait(1);
-          assert(balance == TOKEN_TO_BUY * MIRAI_PER_ETH * TOKEN_DECIMALS);
+          const balance = await game.getTokenOf(user.address);
+
+          // assert(balance == TOKEN_TO_BUY * TOKEN_DECIMALS);
         });
       });
 
       describe("playGame", function () {
         it("should play game", async function () {
-          const TOKEN_TO_BUY = "1";
-          const buyTx = await game.buyToken(user.address, {
-            value: TOKEN_TO_BUY,
-          });
-          const buyReceipt = await buyTx.wait(1);
+          await game.signIn(player1.address);
+          await game.signIn(player2.address);
+          await game.signIn(player3.address);
 
-          const playTx = await game.playGame(user.address, TOKEN_ID);
-          const playReceipt = await playTx.wait(1);
-          expect(playReceipt.events[0].event).to.equal("GamePlayed");
+          expect(
+            await game.distributeToken(
+              player1.address,
+              player2.address,
+              player3.address
+            )
+          ).to.emit("WinnersPaid");
+        });
+
+        it("gives correct amount to winners", async function () {
+          await game.signIn(player1.address);
+          await game.signIn(player2.address);
+          await game.signIn(player3.address);
+
+          // transfer 50 eth to game contract
+          await game.buyToken(deployer.address, {
+            value: ethers.utils.parseEther("50"),
+          });
+
+          const gameContractBalance = await ethers.provider.getBalance(
+            gameContract.address
+          );
+
+          const tokenBalanceBefore = await ethers.provider
+            .getBalance(player1.address)
+            .toString();
+
+          const ownerBalanceBefore = (
+            await ethers.provider.getBalance(deployer.address)
+          ).toString();
+
+          const tx = await game.distributeToken(
+            player1.address,
+            player2.address,
+            player3.address
+          );
+          const receipt = await tx.wait(1);
+
+          const tokenBalanceAfter = (
+            await ethers.provider.getBalance(player1.address)
+          ).toString();
+          const ownerBalanceAfter = (
+            await ethers.provider.getBalance(deployer.address)
+          ).toString();
+
+          console.log(
+            "player1 balance before",
+            tokenBalanceBefore,
+            "\nafter",
+            tokenBalanceAfter
+          );
+
+          console.log(
+            "owner balance before",
+            ownerBalanceBefore,
+            "\nafter",
+            ownerBalanceAfter
+          );
+
+          // assert(tokenBalanceAfter > tokenBalanceBefore);
         });
       });
 

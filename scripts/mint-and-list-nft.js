@@ -5,15 +5,23 @@ const PRICE = ethers.utils.parseEther("0.01");
 
 async function mintAndList() {
   const nftMarketplace = await ethers.getContract("Marketplace");
+  const VRFCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
   const IpfsNft = await ethers.getContract("IpfsNFT");
 
   console.log("Minting NFT...");
   const mintTx = await IpfsNft.requestNft();
   const mintTxReceipt = await mintTx.wait(1);
-  console.log(mintTxReceipt.events[0].args);
-  const tokenId = mintTxReceipt.events[0].args.tokenId;
-  console.log("Approving NFT...");
-  const approvalTx = await IpfsNft.approve(nftMarketplace.address, tokenId);
+  const tokenId = mintTxReceipt.events[1].args[0].toString();
+
+  await VRFCoordinatorV2Mock.fulfillRandomWords(
+    mintTxReceipt.events[1].args[2],
+    IpfsNft.address
+  );
+
+  await console.log("Approving NFT...");
+  const approvalTx = await IpfsNft.approve(nftMarketplace.address, tokenId, {
+    gasLimit: 1000000,
+  });
   await approvalTx.wait(1);
 
   console.log("Listing NFT...");
