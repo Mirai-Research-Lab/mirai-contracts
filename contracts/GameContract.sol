@@ -13,7 +13,7 @@ contract GameContract {
         uint256 tokenAmount;
     }
     //Constants
-    uint256 constant DECIMALS = 100000000000000000;
+    uint256 constant DECIMALS = 1000000000000000000;
     // Variables
     address private s_owner;
     uint256 private s_numberOfPlayers;

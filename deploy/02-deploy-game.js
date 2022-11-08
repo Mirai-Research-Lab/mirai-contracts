@@ -1,10 +1,14 @@
 const { network, ethers } = require("hardhat");
-const { developmentChains,networkConfig } = require("../helper-hardhat-config");
+const {
+  developmentChains,
+  networkConfig,
+} = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
 
 const {
   TOKEN_NEEDED_TO_PLAY,
   TOKEN_AMOUNT_GIVEN_TO_PLAYER,
+  INITIAL_TOKEN_SUPPLY,
 } = require("../helper-hardhat-config");
 
 module.exports = async ({ getNamedAccounts, deployments }) => {
