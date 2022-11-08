@@ -24,10 +24,10 @@ contract GameContract {
     uint256 immutable i_tokenNeededToPlay;
     AggregatorV3Interface internal s_priceFeed;
     // Events
-    event PlayerSigned(address indexed msg.sender);
-    event GameStarted(address indexed msg.sender, uint256 indexed remainingToken);
+    event PlayerSigned(address indexed sender);
+    event GameStarted(address indexed sender, uint256 indexed remainingToken);
     event TokenBought(
-        address indexed msg.sender,
+        address indexed sender,
         uint256 indexed tokenAmountBought
     );
     event WinnersPaid(address[] indexed winners, uint256[] indexed prizes);
@@ -87,7 +87,11 @@ contract GameContract {
             revert GameContract__NoEthSent();
         }
         s_token.approve(address(this), tokenToTransfer * DECIMALS);
-        s_token.transferFrom(address(this), msg.sender, tokenToTransfer * DECIMALS);
+        s_token.transferFrom(
+            address(this),
+            msg.sender,
+            tokenToTransfer * DECIMALS
+        );
         s_addressToToken[msg.sender].tokenAmount =
             s_addressToToken[msg.sender].tokenAmount +
             tokenToTransfer *
