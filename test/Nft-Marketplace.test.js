@@ -7,7 +7,7 @@ const { developmentChains } = require("../helper-hardhat-config");
   : describe("Nft Marketplace Unit Tests", function () {
       let nftMarketplace, nftMarketplaceContract, IpfsNft, IpfsNftContract;
       const PRICE = ethers.utils.parseEther("0.1");
-      const TOKEN_ID = 0;
+      const TOKEN_ID = "0";
 
       beforeEach(async () => {
         accounts = await ethers.getSigners(); // could also do with getNamedAccounts
@@ -22,10 +22,14 @@ const { developmentChains } = require("../helper-hardhat-config");
 
       describe("listItem", function () {
         it("emits an event after listing an item", async function () {
+          const nftTx = await IpfsNft.requestNft();
+          await nftTx.wait(1);
+
           expect(
             await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE)
           ).to.emit("ItemAdded");
         });
+
         it("price should be above zero", async function () {
           console.log("lol");
           await expect(
@@ -161,7 +165,6 @@ const { developmentChains } = require("../helper-hardhat-config");
           const { gasUsed, effectiveGasPrice } = transactionReceipt;
           const gasCost = gasUsed.mul(effectiveGasPrice);
           const deployerBalanceAfter = await deployer.getBalance();
-
           assert(
             deployerBalanceAfter.add(gasCost).toString() ==
               deployerProceedsBefore.add(deployerBalanceBefore).toString()
