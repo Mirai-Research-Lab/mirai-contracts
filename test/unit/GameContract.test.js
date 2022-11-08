@@ -11,9 +11,11 @@ const {
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("Game Unit Tests", function () {
-      let gameContract, gameContractContract, IpfsNft, IpfsNftContract;
-      const PRICE = ethers.utils.parseEther("0.1");
+      let gameContract, IpfsNft, IpfsNftContract, MIRAI_PER_ETH;
+      const PRICE = ethers.utils.parseEther("1");
       const TOKEN_ID = 0;
+      const ETH = "1";
+      const TOKEN_DECIMALS = 10 ** DECIMALS;
 
       beforeEach(async () => {
         accounts = await ethers.getSigners();
@@ -23,6 +25,7 @@ const {
 
         gameContract = await ethers.getContract("GameContract");
         game = gameContract.connect(deployer);
+        MIRAI_PER_ETH = await game.getConversion(ETH);
 
         IpfsNftContract = await ethers.getContract("IpfsNFT");
         IpfsNft = IpfsNftContract.connect(deployer);
@@ -42,20 +45,32 @@ const {
         it("should buy token", async function () {
           const TOKEN_TO_BUY = "1";
 
-          console.log(
-            "Tokens in game = ",
-            (await gameContract.getTokenOf(game.address)).toString()
-          );
-
-          console.log(
-            "1 eth = ",
-            TOKEN_TO_BUY.toString(),
-            (await game.getConversion(TOKEN_TO_BUY)).toString()
-          );
-
           expect(
             await game.buyToken(user.address, { value: TOKEN_TO_BUY })
           ).to.emit("TokenBought");
+        });
+
+        it("should update token balance", async function () {
+          const TOKEN_TO_BUY = "1";
+          const buyTx = await game.buyToken(user.address, {
+            value: TOKEN_TO_BUY,
+          });
+          const buyReceipt = await buyTx.wait(1);
+          assert(balance == TOKEN_TO_BUY * MIRAI_PER_ETH * TOKEN_DECIMALS);
+        });
+      });
+
+      describe("playGame", function () {
+        it("should play game", async function () {
+          const TOKEN_TO_BUY = "1";
+          const buyTx = await game.buyToken(user.address, {
+            value: TOKEN_TO_BUY,
+          });
+          const buyReceipt = await buyTx.wait(1);
+
+          const playTx = await game.playGame(user.address, TOKEN_ID);
+          const playReceipt = await playTx.wait(1);
+          expect(playReceipt.events[0].event).to.equal("GamePlayed");
         });
       });
 
@@ -70,7 +85,7 @@ const {
           const tokenNeeded = await game.getTokenNeededToPlay();
           assert.equal(
             tokenNeeded.toString(),
-            TOKEN_NEEDED_TO_PLAY * 10 ** DECIMALS
+            TOKEN_NEEDED_TO_PLAY * TOKEN_DECIMALS
           );
         });
 
@@ -83,7 +98,7 @@ const {
           const tokenSupply = await game.getInitialTokenGiven();
           assert.equal(
             tokenSupply.toString(),
-            TOKEN_AMOUNT_GIVEN_TO_PLAYER * 10 ** DECIMALS
+            TOKEN_AMOUNT_GIVEN_TO_PLAYER * TOKEN_DECIMALS
           );
         });
       });
