@@ -118,5 +118,5 @@ Cargo.lock
 deployments/
 artifacts/
 cache/
-./coverage.json
-./gas-report.txt
+coverage.json
+gas-report.txt
