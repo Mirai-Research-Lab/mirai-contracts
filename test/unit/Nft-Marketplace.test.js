@@ -8,7 +8,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
   : describe("Nft Marketplace Unit Tests", function () {
       let nftMarketplace, nftMarketplaceContract, IpfsNft, VRFCoordinatorV2Mock;
       const PRICE = ethers.utils.parseEther("0.1");
-      const TOKEN_ID = "0";
+      let tokenId;
 
       beforeEach(async () => {
         accounts = await ethers.getSigners(); // could also do with getNamedAccounts
@@ -22,161 +22,95 @@ const { developmentChains } = require("../../helper-hardhat-config");
           "VRFCoordinatorV2Mock",
           deployer
         );
+
+        const requestTx = await IpfsNft.requestNft();
+        const reqeustReciept = await requestTx.wait(1);
+        await VRFCoordinatorV2Mock.fulfillRandomWords(
+          reqeustReciept.events[1].args[2],
+          IpfsNft.address
+        );
+        tokenId = reqeustReciept.events[1].args[0];
+
+        const approvalTx = await IpfsNft.approve(
+          nftMarketplace.address,
+          tokenId,
+          {
+            gasLimit: 1000000,
+          }
+        );
+        await approvalTx.wait(1);
       });
 
       describe("listItem", function () {
         it("emits an event after listing an item", async function () {
-          const requestTx = await IpfsNft.requestNft();
-          const reqeustReciept = await nftTx.wait(1);
-          const nftTx = await VRFCoordinatorV2Mock.fulfillRandomWords(
-            reqeustReciept.events[1].args[2],
-            IpfsNft.address
-          );
-          await nftTx.wait(1);
           expect(
-            await nftMarketplace.listItem(IpfsNft.address, "1", "10")
+            await nftMarketplace.listItem(IpfsNft.address, tokenId, "10")
           ).to.emit("ItemAdded");
         });
 
         it("price should be above zero", async function () {
-          console.log("lol");
           await expect(
-            nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, -1)
+            nftMarketplace.listItem(IpfsNft.address, tokenId, "0")
           ).to.be.revertedWith("Marketplace__PriceShouldBeAboveZero");
         });
-        it("exclusively allows owners to list", async function () {
-          nftMarketplace = nftMarketplaceContract.connect(user);
-          await IpfsNft.approve(user.address, TOKEN_ID);
-          await expect(
-            nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE)
-          ).to.be.revertedWith("NotOwner");
-        });
-        it("needs approvals to list item", async function () {
-          await IpfsNft.approve(ethers.constants.AddressZero, TOKEN_ID);
-          await expect(
-            nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE)
-          ).to.be.revertedWith("Marketplace__NotAppoved()");
-        });
+
         it("Updates listing with seller and price", async function () {
-          await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE);
-          const listing = await nftMarketplace.getListing(
-            IpfsNft.address,
-            TOKEN_ID
-          );
-          assert(listing.price.toString() == PRICE.toString());
-          assert(listing.seller.toString() == deployer.address);
+          const newPrice = "10000";
+          await nftMarketplace.listItem(IpfsNft.address, tokenId, "1");
+
+          expect(
+            await nftMarketplace.updateItem(IpfsNft.address, tokenId, newPrice)
+          ).to.emit("ItemAdded");
         });
       });
+
       describe("cancelListing", function () {
         it("reverts if there is no listing", async function () {
-          const error = `NotListed("${IpfsNft.address}", ${TOKEN_ID})`;
           await expect(
-            nftMarketplace.cancelListing(IpfsNft.address, TOKEN_ID)
-          ).to.be.revertedWith(error);
+            nftMarketplace.cancelItem(IpfsNft.address, tokenId)
+          ).to.be.revertedWith("Marketplace__NotListed");
         });
+
         it("reverts if anyone but the owner tries to call", async function () {
-          await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE);
+          await nftMarketplace.listItem(IpfsNft.address, tokenId, PRICE);
+
           nftMarketplace = nftMarketplaceContract.connect(user);
-          await IpfsNft.approve(user.address, TOKEN_ID);
+          await IpfsNft.approve(user.address, tokenId);
           await expect(
-            nftMarketplace.cancelListing(IpfsNft.address, TOKEN_ID)
-          ).to.be.revertedWith("NotOwner");
+            nftMarketplace.cancelItem(IpfsNft.address, tokenId)
+          ).to.be.revertedWith("Marketplace__NotOwnerOfNFT");
         });
+
         it("emits event and removes listing", async function () {
-          await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE);
+          await nftMarketplace.listItem(IpfsNft.address, tokenId, PRICE);
           expect(
-            await nftMarketplace.cancelListing(IpfsNft.address, TOKEN_ID)
-          ).to.emit("ItemCanceled");
-          const listing = await nftMarketplace.getListing(
-            IpfsNft.address,
-            TOKEN_ID
-          );
-          assert(listing.price.toString() == "0");
+            await nftMarketplace.cancelItem(IpfsNft.address, tokenId)
+          ).to.emit("ItemCancelled");
         });
       });
+
       describe("buyItem", function () {
         it("reverts if the item isnt listed", async function () {
           await expect(
-            nftMarketplace.buyItem(IpfsNft.address, TOKEN_ID)
-          ).to.be.revertedWith("NotListed");
+            nftMarketplace.buyItem(IpfsNft.address, tokenId)
+          ).to.be.revertedWith("Marketplace__NotListed");
         });
+
         it("reverts if the price isnt met", async function () {
-          await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE);
+          await nftMarketplace.listItem(IpfsNft.address, tokenId, PRICE);
           await expect(
-            nftMarketplace.buyItem(IpfsNft.address, TOKEN_ID)
-          ).to.be.revertedWith("PriceNotMet");
+            nftMarketplace.buyItem(IpfsNft.address, tokenId)
+          ).to.be.revertedWith("Marketplace__NotSentEnoughEth");
         });
+
         it("transfers the nft to the buyer and updates internal proceeds record", async function () {
-          await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE);
+          await nftMarketplace.listItem(IpfsNft.address, tokenId, PRICE);
           nftMarketplace = nftMarketplaceContract.connect(user);
           expect(
-            await nftMarketplace.buyItem(IpfsNft.address, TOKEN_ID, {
+            await nftMarketplace.buyItem(IpfsNft.address, tokenId, {
               value: PRICE,
             })
           ).to.emit("ItemBought");
-          const newOwner = await IpfsNft.ownerOf(TOKEN_ID);
-          const deployerProceeds = await nftMarketplace.getProceeds(
-            deployer.address
-          );
-          assert(newOwner.toString() == user.address);
-          assert(deployerProceeds.toString() == PRICE.toString());
-        });
-      });
-      describe("updateListing", function () {
-        it("must be owner and listed", async function () {
-          await expect(
-            nftMarketplace.updateListing(IpfsNft.address, TOKEN_ID, PRICE)
-          ).to.be.revertedWith("NotListed");
-          await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE);
-          nftMarketplace = nftMarketplaceContract.connect(user);
-          await expect(
-            nftMarketplace.updateListing(IpfsNft.address, TOKEN_ID, PRICE)
-          ).to.be.revertedWith("NotOwner");
-        });
-        it("updates the price of the item", async function () {
-          const updatedPrice = ethers.utils.parseEther("0.2");
-          await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE);
-          expect(
-            await nftMarketplace.updateListing(
-              IpfsNft.address,
-              TOKEN_ID,
-              updatedPrice
-            )
-          ).to.emit("ItemListed");
-          const listing = await nftMarketplace.getListing(
-            IpfsNft.address,
-            TOKEN_ID
-          );
-          assert(listing.price.toString() == updatedPrice.toString());
-        });
-      });
-      describe("withdrawProceeds", function () {
-        it("doesn't allow 0 proceed withdrawls", async function () {
-          await expect(nftMarketplace.withdrawProceeds()).to.be.revertedWith(
-            "NoProceeds"
-          );
-        });
-        it("withdraws proceeds", async function () {
-          await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE);
-          nftMarketplace = nftMarketplaceContract.connect(user);
-          await nftMarketplace.buyItem(IpfsNft.address, TOKEN_ID, {
-            value: PRICE,
-          });
-          nftMarketplace = nftMarketplaceContract.connect(deployer);
-
-          const deployerProceedsBefore = await nftMarketplace.getProceeds(
-            deployer.address
-          );
-          const deployerBalanceBefore = await deployer.getBalance();
-          const txResponse = await nftMarketplace.withdrawProceeds();
-          const transactionReceipt = await txResponse.wait(1);
-          const { gasUsed, effectiveGasPrice } = transactionReceipt;
-          const gasCost = gasUsed.mul(effectiveGasPrice);
-          const deployerBalanceAfter = await deployer.getBalance();
-          assert(
-            deployerBalanceAfter.add(gasCost).toString() ==
-              deployerProceedsBefore.add(deployerBalanceBefore).toString()
-          );
         });
       });
     });
