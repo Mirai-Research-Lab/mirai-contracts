@@ -11,7 +11,15 @@ library PriceConverter {
     {
         (, int256 answer, , , ) = priceFeed.latestRoundData();
         // ETH/USD rate in 18 digit
-        return uint256(answer * 10000000000);
+        return uint256(answer);
+    }
+
+    function getResponseDecimals(AggregatorV3Interface priceFeed)
+        internal
+        view
+        returns (uint256)
+    {
+        return priceFeed.decimals();
     }
 
     // 1000000000
@@ -20,7 +28,7 @@ library PriceConverter {
         AggregatorV3Interface priceFeed
     ) internal view returns (uint256) {
         uint256 ethPrice = getPrice(priceFeed);
-        uint256 ethAmountInUsd = (ethPrice * ethAmount) / 1000000000000000000;
+        uint256 ethAmountInUsd = (ethPrice * ethAmount);
         return ethAmountInUsd;
     }
 }
