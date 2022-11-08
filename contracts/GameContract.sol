@@ -86,8 +86,8 @@ contract GameContract {
         if (tokenToTransfer == 0) {
             revert GameContract__NoEthSent();
         }
-        s_token.approve(address(this), tokenToTransfer * DECIMALS);
-        s_token.transferFrom(address(this), signer, tokenToTransfer * DECIMALS);
+        s_token.approve(address(this), tokenToTransfer);
+        s_token.transferFrom(address(this), signer, tokenToTransfer);
         s_addressToToken[signer].tokenAmount =
             s_addressToToken[signer].tokenAmount +
             tokenToTransfer *
