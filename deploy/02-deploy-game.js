@@ -32,6 +32,7 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     args: [
       Number(TOKEN_AMOUNT_GIVEN_TO_PLAYER),
       Number(TOKEN_NEEDED_TO_PLAY),
+      INITIAL_TOKEN_SUPPLY,
       MockV3AggregatorAddress,
     ],
     waitConfimations: 1,

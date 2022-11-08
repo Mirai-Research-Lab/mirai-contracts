@@ -39,12 +39,13 @@ const {
           ).to.be.revertedWith("GameContract__NoEthSent");
         });
 
-        // it("should buy token", async function () {
-        //   const TOKEN_TO_BUY = "1";
-        //   await expect(
-        //     await game.buyToken(user.address, { value: TOKEN_TO_BUY })
-        //   ).to.be.reverted();
-        // });
+        it("should buy token", async function () {
+          const TOKEN_TO_BUY = "1";
+          console.log((await game.getConversion(TOKEN_TO_BUY)).toString());
+          expect(
+            await game.buyToken(user.address, { value: TOKEN_TO_BUY })
+          ).to.emit("TokenBought");
+        });
       });
 
       describe("getter functions ", function () {
