@@ -118,5 +118,6 @@ Cargo.lock
 deployments/
 artifacts/
 cache/
+coverage/
 coverage.json
 gas-report.txt
