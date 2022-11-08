@@ -48,12 +48,12 @@ contract GameContract {
         address priceFeed
     ) {
         s_owner = msg.sender;
-        i_initialTokenSupply = initialTokenSupply;
+        i_initialTokenSupply = initialTokenSupply * DECIMALS;
         i_initialTokenGivenToPlayers = initialTokenGivenToPlayers * DECIMALS;
         i_tokenNeededToPlay = tokenNeededToPlay * DECIMALS;
         s_priceFeed = AggregatorV3Interface(priceFeed);
         s_numberOfPlayers = 0;
-        s_token = new MiraiToken(i_initialTokenSupply * DECIMALS);
+        s_token = new MiraiToken(i_initialTokenSupply);
     }
 
     // Main functions
@@ -86,11 +86,12 @@ contract GameContract {
         if (tokenToTransfer == 0) {
             revert GameContract__NoEthSent();
         }
-        s_token.approve(address(this), tokenToTransfer);
-        s_token.transferFrom(address(this), signer, tokenToTransfer);
+        s_token.approve(address(this), tokenToTransfer * DECIMALS);
+        s_token.transferFrom(address(this), signer, tokenToTransfer * DECIMALS);
         s_addressToToken[signer].tokenAmount =
             s_addressToToken[signer].tokenAmount +
-            tokenToTransfer;
+            tokenToTransfer *
+            DECIMALS;
         emit TokenBought(signer, tokenToTransfer);
     }
 
@@ -165,5 +166,13 @@ contract GameContract {
         returns (uint256 convertedAmount)
     {
         return amount.getConversionRate(s_priceFeed);
+    }
+
+    function getTotalTokenSupply() public view returns (uint256 amount) {
+        return s_token.totalSupply();
+    }
+
+    function getPriceFeedDecimals() public view returns (uint8 decimals) {
+        return s_priceFeed.decimals();
     }
 }

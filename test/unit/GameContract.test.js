@@ -41,7 +41,18 @@ const {
 
         it("should buy token", async function () {
           const TOKEN_TO_BUY = "1";
-          console.log((await game.getConversion(TOKEN_TO_BUY)).toString());
+
+          console.log(
+            "Tokens in game = ",
+            (await gameContract.getTokenOf(game.address)).toString()
+          );
+
+          console.log(
+            "1 eth = ",
+            TOKEN_TO_BUY.toString(),
+            (await game.getConversion(TOKEN_TO_BUY)).toString()
+          );
+
           expect(
             await game.buyToken(user.address, { value: TOKEN_TO_BUY })
           ).to.emit("TokenBought");
@@ -77,3 +88,6 @@ const {
         });
       });
     });
+
+// Total Token Supply : 100000000000000000000000000000000000000
+// Tokens in 1 eth    : 100000000000000000000
