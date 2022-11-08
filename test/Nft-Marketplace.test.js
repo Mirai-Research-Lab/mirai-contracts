@@ -23,10 +23,11 @@ const { developmentChains } = require("../helper-hardhat-config");
       describe("listItem", function () {
         it("emits an event after listing an item", async function () {
           const nftTx = await IpfsNft.requestNft();
-          await nftTx.wait(1);
-
+          const nftReciept = await nftTx.wait(1);
+          console.log(nftReciept);
+          let ttOKEN_ID = await IpfsNft.getTokenCounter();
           expect(
-            await nftMarketplace.listItem(IpfsNft.address, TOKEN_ID, PRICE)
+            await nftMarketplace.listItem(IpfsNft.address, 0, PRICE)
           ).to.emit("ItemAdded");
         });
 
