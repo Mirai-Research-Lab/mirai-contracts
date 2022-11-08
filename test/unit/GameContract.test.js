@@ -1,6 +1,12 @@
 const { assert, expect } = require("chai");
+const { BigNumber } = require("ethers");
 const { network, deployments, ethers } = require("hardhat");
-const { developmentChains } = require("../../helper-hardhat-config");
+const {
+  developmentChains,
+  TOKEN_AMOUNT_GIVEN_TO_PLAYER,
+  TOKEN_NEEDED_TO_PLAY,
+  DECIMALS,
+} = require("../../helper-hardhat-config");
 
 !developmentChains.includes(network.name)
   ? describe.skip
@@ -13,52 +19,60 @@ const { developmentChains } = require("../../helper-hardhat-config");
         accounts = await ethers.getSigners();
         deployer = accounts[0];
         user = accounts[1];
-        console.log("deployer", deployer.address);
-        console.log("user", user.address);
         await deployments.fixture(["all"]);
-        gameContractContract = await ethers.getContract("GameContract");
-        gameContract = gameContractContract.connect(deployer);
+
+        gameContract = await ethers.getContract("GameContract");
+        game = gameContract.connect(deployer);
+
         IpfsNftContract = await ethers.getContract("IpfsNFT");
         IpfsNft = IpfsNftContract.connect(deployer);
+
+        const nftTx = await IpfsNft.requestNft();
+        const nftReceipt = await nftTx.wait(1);
       });
 
       describe("buyToken", function () {
-        it("emits an event after buying a token", async function () {
-          expect(await gameContract.buyToken(user.address)).to.emit(
-            "TokenBought"
-          );
-        });
-
         it("price should be above zero", async function () {
-          console.log("lol");
+          const TOKEN_TO_BUY = "0";
           await expect(
-            gameContract.buyToken(user.address, -1)
-          ).to.be.revertedWith("Marketplace__PriceShouldBeAboveZero");
+            game.buyToken(user.address, { value: TOKEN_TO_BUY })
+          ).to.be.revertedWith("GameContract__NoEthSent");
         });
 
-        it("exclusively allows owners to list", async function () {
-          gameContract = gameContractContract.connect(user);
-          await IpfsNft.approve(user.address, TOKEN_ID);
-          await expect(
-            gameContract.buyToken(user.address, PRICE)
-          ).to.be.revertedWith("NotOwner");
+        // it("should buy token", async function () {
+        //   const TOKEN_TO_BUY = "1";
+        //   await expect(
+        //     await game.buyToken(user.address, { value: TOKEN_TO_BUY })
+        //   ).to.be.reverted();
+        // });
+      });
+
+      describe("getter functions ", function () {
+        it("returns player info", async function () {
+          const playerInfo = await game.getPlayerInfo(user.address);
+          assert.equal(playerInfo[0], 0);
+          assert.equal(playerInfo[1], 0);
         });
 
-        it("needs approvals to list item", async function () {
-          await IpfsNft.approve(ethers.constants.AddressZero, TOKEN_ID);
-          await expect(
-            gameContract.buyToken(user.address, PRICE)
-          ).to.be.revertedWith("Marketplace__NotAppoved()");
-        });
-
-        it("Updates listing with seller and price", async function () {
-          await gameContract.buyToken(user.address, PRICE);
-          const listing = await gameContract.getListing(
-            IpfsNft.address,
-            TOKEN_ID
+        it("returns token needed to play", async function () {
+          const tokenNeeded = await game.getTokenNeededToPlay();
+          assert.equal(
+            tokenNeeded.toString(),
+            TOKEN_NEEDED_TO_PLAY * 10 ** DECIMALS
           );
-          assert(listing.price.toString() == PRICE.toString());
-          assert(listing.seller.toString() == deployer.address);
+        });
+
+        it("return total number of players participating", async function () {
+          const totalPlayers = await game.getNumberOfPlayers();
+          assert.equal(totalPlayers, 0);
+        });
+
+        it("returns correct initial token supply", async function () {
+          const tokenSupply = await game.getInitialTokenGiven();
+          assert.equal(
+            tokenSupply.toString(),
+            TOKEN_AMOUNT_GIVEN_TO_PLAYER * 10 ** DECIMALS
+          );
         });
       });
     });
