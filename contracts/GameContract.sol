@@ -13,26 +13,27 @@ contract GameContract {
         uint256 tokenAmount;
     }
     //Constants
-    uint256 constant DECIMALS = 100000000000000000;
+    uint256 constant DECIMALS = 1000000000000000000;
     // Variables
     address private s_owner;
     uint256 private s_numberOfPlayers;
     mapping(address => PlayerInfo) private s_addressToToken;
     MiraiToken private s_token;
+    uint256 immutable i_initialTokenGivenToPlayers;
     uint256 immutable i_initialTokenSupply;
     uint256 immutable i_tokenNeededToPlay;
     AggregatorV3Interface internal s_priceFeed;
     // Events
-    event PlayerSigned(address indexed signer);
-    event GameStarted(address indexed signer, uint256 indexed remainingToken);
+    event PlayerSigned(address indexed sender);
+    event GameStarted(address indexed sender, uint256 indexed remainingToken);
     event TokenBought(
-        address indexed signer,
+        address indexed sender,
         uint256 indexed tokenAmountBought
     );
     event WinnersPaid(address[] indexed winners, uint256[] indexed prizes);
     // Errors
     error GameContract__PlayerAlreadyExists();
-    error GameContract__NotEnoughTokens(address signer);
+    error GameContract__NotEnoughTokens();
     error GameContract__AmountTransferFailed();
     error GameContract__NoEthSent();
     modifier onlyOwner() {
@@ -41,52 +42,61 @@ contract GameContract {
     }
 
     constructor(
-        uint256 initialTokenSupply,
+        uint256 initialTokenGivenToPlayers,
         uint256 tokenNeededToPlay,
+        uint256 initialTokenSupply,
         address priceFeed
     ) {
         s_owner = msg.sender;
         i_initialTokenSupply = initialTokenSupply * DECIMALS;
+        i_initialTokenGivenToPlayers = initialTokenGivenToPlayers * DECIMALS;
         i_tokenNeededToPlay = tokenNeededToPlay * DECIMALS;
         s_priceFeed = AggregatorV3Interface(priceFeed);
         s_numberOfPlayers = 0;
+        s_token = new MiraiToken(i_initialTokenSupply);
     }
 
     // Main functions
-    function signIn(address signer) public {
-        if (s_addressToToken[signer].id > 0) {
+    function signIn() public {
+        if (s_addressToToken[msg.sender].id > 0) {
             revert GameContract__PlayerAlreadyExists();
         }
-        s_token.transfer(signer, 20 * DECIMALS);
-        s_addressToToken[signer].tokenAmount = 20 * DECIMALS;
-        s_addressToToken[signer].id = 1;
+        s_token.approve(address(this), 20 * DECIMALS);
+        s_token.transferFrom(address(this), msg.sender, 20 * DECIMALS);
+        s_addressToToken[msg.sender].tokenAmount = 20 * DECIMALS;
+        s_addressToToken[msg.sender].id = 1;
         s_numberOfPlayers = s_numberOfPlayers + 1;
-        emit PlayerSigned(signer);
+        emit PlayerSigned(msg.sender);
     }
 
-    function burn(address signer) public returns (uint256 isApproved) {
-        if (s_token.balanceOf(signer) < i_tokenNeededToPlay) {
+    function burn() public returns (uint256 isApproved) {
+        if (s_token.balanceOf(msg.sender) < i_tokenNeededToPlay) {
             return 0;
         }
-        s_token.transferFrom(signer, s_owner, i_tokenNeededToPlay);
-        s_addressToToken[signer].tokenAmount =
-            s_addressToToken[signer].tokenAmount -
+        s_token.transferFrom(address(this), s_owner, i_tokenNeededToPlay);
+        s_addressToToken[msg.sender].tokenAmount =
+            s_addressToToken[msg.sender].tokenAmount -
             i_tokenNeededToPlay;
-        emit GameStarted(signer, s_addressToToken[signer].tokenAmount);
+        emit GameStarted(msg.sender, s_addressToToken[msg.sender].tokenAmount);
         return 1;
     }
 
-    function buyToken(address signer) public payable {
-        uint256 tokenToTransfer = msg.value.getConversionRate(s_priceFeed) *
-            DECIMALS;
+    function buyToken() public payable {
+        uint256 tokenToTransfer = msg.value.getConversionRate(s_priceFeed);
         if (tokenToTransfer == 0) {
             revert GameContract__NoEthSent();
         }
-        s_token.transferFrom(s_owner, signer, tokenToTransfer);
-        s_addressToToken[signer].tokenAmount =
-            s_addressToToken[signer].tokenAmount +
-            tokenToTransfer;
-        emit TokenBought(signer, tokenToTransfer);
+        s_token.approve(address(this), tokenToTransfer * DECIMALS);
+        s_token.transferFrom(
+            address(this),
+            msg.sender,
+            tokenToTransfer * DECIMALS
+        );
+        s_addressToToken[msg.sender].tokenAmount =
+            s_addressToToken[msg.sender].tokenAmount +
+            tokenToTransfer *
+            DECIMALS;
+        emit TokenBought(msg.sender, tokenToTransfer);
     }
 
     function distributeToken(
@@ -130,12 +140,12 @@ contract GameContract {
     }
 
     // Getter functions
-    function getPlayerInfo(address signer)
+    function getPlayerInfo()
         public
         view
         returns (PlayerInfo memory playerInfo)
     {
-        return s_addressToToken[signer];
+        return s_addressToToken[msg.sender];
     }
 
     function getTokenNeededToPlay() public view returns (uint256 amount) {
@@ -143,10 +153,30 @@ contract GameContract {
     }
 
     function getInitialTokenGiven() public view returns (uint256 amount) {
-        return i_initialTokenSupply;
+        return i_initialTokenGivenToPlayers;
     }
 
     function getNumberOfPlayers() public view returns (uint256 number) {
         return s_numberOfPlayers;
+    }
+
+    function getTokenOf(address player) public view returns (uint256 amount) {
+        return s_token.balanceOf(player);
+    }
+
+    function getConversion(uint256 amount)
+        public
+        view
+        returns (uint256 convertedAmount)
+    {
+        return amount.getConversionRate(s_priceFeed);
+    }
+
+    function getTotalTokenSupply() public view returns (uint256 amount) {
+        return s_token.totalSupply();
+    }
+
+    function getPriceFeedDecimals() public view returns (uint8 decimals) {
+        return s_priceFeed.decimals();
     }
 }
