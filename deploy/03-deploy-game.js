@@ -22,19 +22,19 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     MockV3Aggregator = await ethers.getContract("MockV3Aggregator");
     MockV3AggregatorAddress = MockV3Aggregator.address;
   } else {
-    MockV3AggregatorAddress = networkConfig[chainId].MockV3AggregatorAddress;
+    MockV3AggregatorAddress = networkConfig[chainId].ethUsdPriceFeed;
   }
-
+  const args = [
+    TOKEN_AMOUNT_GIVEN_TO_PLAYER,
+    TOKEN_NEEDED_TO_PLAY,
+    INITIAL_TOKEN_SUPPLY,
+    MockV3AggregatorAddress,
+  ];
   console.log("----Deploying----");
   const gameContract = await deploy("GameContract", {
     from: deployer,
     log: true,
-    args: [
-      Number(TOKEN_AMOUNT_GIVEN_TO_PLAYER),
-      Number(TOKEN_NEEDED_TO_PLAY),
-      INITIAL_TOKEN_SUPPLY,
-      MockV3AggregatorAddress,
-    ],
+    args: args,
     waitConfimations: 1,
   });
 
