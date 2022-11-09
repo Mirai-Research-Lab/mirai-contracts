@@ -4,10 +4,11 @@ const {
   networkConfig,
 } = require("../helper-hardhat-config");
 const { verify } = require("../utils/verify");
-// const {
-//   storeImages,
-//   storeTokenUriMetadata,
-// } = require("../utils/upload-to-pinata");
+const {
+  storeImages,
+  storeTokenUriMetadata,
+} = require("../utils/upload-to-pinata");
+const { tokenUris } = require("../nft-uri/nft-uri");
 
 const imagesPath = "./images/";
 const metadataTemplate = {
@@ -16,20 +17,20 @@ const metadataTemplate = {
   image: "",
   attributes: [{}],
 };
-let tokenUris = [
-  "ipfs://Qme7JNcekbfBjcxc2y4xh3q8XSmySqNmg8YKJg7LxBJo6f",
-  "ipfs://QmZXd9WzqyuCzatkBRCecGsio8czzUmtEefr4a6Fbihskp",
-  "ipfs://QmbVHnAisxBMiWY9hAETXQm5eQxnWdLnsjj9VUM65wHJ8W",
-];
+
+let tokenUris = tokenUris;
+
 const FUND_AMOUNT = "10000000000000000000"; //10 LINK
 module.exports = async function ({ getNamedAccounts, deployments }) {
   const { deploy, log } = deployments;
   const { deployer } = await getNamedAccounts();
   const chainId = network.config.chainId;
   let vrfCoordinatorV2Mock;
-  // if (process.env.UPLOAD_TO_PINATA == "false") {
-  //   tokenUris = await handleTokenUris();
-  // }
+
+  if (process.env.UPLOAD_TO_PINATA == "no") {
+    tokenUris = await handleTokenUris();
+  }
+
   let vrfCoordinatorV2Address;
   let subscriptionId;
   if (developmentChains.includes(network.name)) {
@@ -52,7 +53,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     subscriptionId,
     networkConfig[chainId].gasLane,
     networkConfig[chainId].callbackGasLimit,
-    "3",
+    tokenUris.length,
     tokenUris,
   ];
 
@@ -82,11 +83,12 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
 async function handleTokenUris() {
   const { responses, files } = await storeImages(imagesPath);
   const tokenUris = [];
-  //store metadata on IPFS
+
   for (responseIndex in responses) {
     let tokenUriMetadata = { ...metadataTemplate };
-    tokenUriMetadata.name = files[responseIndex].replace(".png", "");
-    tokenUriMetadata.description = `${tokenUriMetadata.name} just joined you on your adventure`; //You can also add some description depending on rarity
+    tokenUriMetadata.name =
+      files[responseIndex].replace(".webp", "") || "Another cool NFT";
+    tokenUriMetadata.description = `${tokenUriMetadata.name} just joined you on your adventure`;
     tokenUriMetadata.image = `ipfs://${responses[responseIndex].IpfsHash}`;
     console.log(`Uploading ${tokenUriMetadata.name}...`);
     const uploadedMetadataResponse = await storeTokenUriMetadata(
