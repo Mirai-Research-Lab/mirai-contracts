@@ -45,7 +45,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         bytes32 gasLane,
         uint32 callbackGasLimit,
         uint16 maxNFT,
-        string[3] memory charTokenURIs
+        string[36] memory charTokenURIs
     )
         VRFConsumerBaseV2(vrfCoordinatorV2Address)
         ERC721("MobiRandomNFT", "MRN")

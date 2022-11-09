@@ -28,8 +28,8 @@ const charTokenURIs = [
   "https://ipfs.io/ipfs/QmcmUUQ1KPWtdzKJTaFFg5Y56wxWZRMiC1dapysW6grRe7",
   "https://ipfs.io/ipfs/QmcmUUQ1KPWtdzKJTaFFg5Y56wxWZRMiC1dapysW6grRe7",
 ];
-const frontEndContractsFile = "../../constants/networkMapping.json";
-const frontEndAbiLocation = "../../constants/frontEndAbiLocation/";
+const frontEndContractsFile = "../constants/networkMapping.json";
+const frontEndAbiLocation = "../constants/frontEndAbiLocation/";
 
 const developmentChains = ["hardhat", "localhost"];
 module.exports = {
@@ -42,7 +42,5 @@ module.exports = {
   TOKEN_NEEDED_TO_PLAY,
   charTokenURIs,
   frontEndContractsFile,
-  frontEndContractsFile2,
   frontEndAbiLocation,
-  frontEndAbiLocation2,
 };
