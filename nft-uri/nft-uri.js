@@ -1,4 +1,4 @@
-const tokenUris = [
+const tokenURIs = [
   "ipfs://QmehhiFjzMZTD1qizMm1EGHSTQ2WXc1qzEHxkwkdt6Vv2A",
   "ipfs://QmXESgNVeEmPb5wDPGSDBGzTHPPqN5Ehem8YJSPZ7ywHkr",
   "ipfs://QmThkEhDwyTkoHKT8ijDr8U75miHUSHkPBzYqp5ZBmUfAy",
@@ -37,4 +37,4 @@ const tokenUris = [
   "ipfs://QmcdPLSLs6YqBoLEGRmyacWv3e1dJhLCfuuhHGXAevXFXW",
 ];
 
-module.exports = { tokenUris };
+module.exports = { tokenURIs };

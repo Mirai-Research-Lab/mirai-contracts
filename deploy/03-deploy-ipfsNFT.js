@@ -8,7 +8,7 @@ const {
   storeImages,
   storeTokenUriMetadata,
 } = require("../utils/upload-to-pinata");
-const { tokenUris } = require("../nft-uri/nft-uri");
+const { tokenURIs } = require("../nft-uri/nft-uri");
 
 const imagesPath = "./images/";
 const metadataTemplate = {
@@ -18,7 +18,7 @@ const metadataTemplate = {
   attributes: [{}],
 };
 
-let tokenUris = tokenUris;
+let tokenUris = tokenURIs;
 
 const FUND_AMOUNT = "10000000000000000000"; //10 LINK
 module.exports = async function ({ getNamedAccounts, deployments }) {
