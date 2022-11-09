@@ -37,7 +37,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         uint256 indexed requestId
     );
 
-    event Nft_Minted(address indexed minter);
+    event Nft_Minted(address indexed minter, uint256 indexed tokenId);
 
     constructor(
         address vrfCoordinatorV2Address,
@@ -96,7 +96,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         _safeMint(charOwner, newTokenId);
         _setTokenURI(newTokenId, s_TokenURIs[uint256(s_moddedRng)]);
         s_tokenCounter = s_tokenCounter + 1;
-        emit Nft_Minted(charOwner);
+        emit Nft_Minted(charOwner, newTokenId);
     }
 
     function getTokenUris(uint256 index) public view returns (string memory) {
