@@ -24,4 +24,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     });
   }
 };
-module.exports.tags = ["all", "mocks", "goerli"];
+module.exports.tags = ["all", "mocks"];

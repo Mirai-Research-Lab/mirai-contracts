@@ -101,4 +101,4 @@ async function handleTokenUris() {
   return tokenUris;
 }
 
-module.exports.tags = ["all", "ipfs"];
+module.exports.tags = ["all", "ipfs", "main"];
