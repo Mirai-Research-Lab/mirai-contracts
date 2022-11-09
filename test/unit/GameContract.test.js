@@ -1,5 +1,4 @@
 const { assert, expect } = require("chai");
-const { BigNumber } = require("ethers");
 const { network, deployments, ethers } = require("hardhat");
 const {
   developmentChains,
@@ -38,7 +37,27 @@ const {
         const nftTx = await IpfsNft.requestNft();
         const nftReceipt = await nftTx.wait(1);
       });
+      describe("signIn", function () {
+        it("should distribute token on first sign in", async function () {
+          const oldTokenBalance = await game.getTokenOf(player1.address);
+          console.log(
+            "TokenBalance Before Siging in",
+            oldTokenBalance.toString()
+          );
+          const tx = await game.signIn(player1.address);
+          const txReciept = await tx.wait(1);
+          const newTokenBalance = await game.getTokenOf(player1.address);
+          console.log(
+            "Token Balance After Siging in",
+            newTokenBalance.toString()
+          );
 
+          assert.notEqual(
+            newTokenBalance.toString(),
+            oldTokenBalance.toString()
+          );
+        });
+      });
       describe("buyToken", function () {
         it("price should be above zero", async function () {
           const TOKEN_TO_BUY = ethers.utils.parseEther("0");
@@ -132,7 +151,10 @@ const {
             ownerBalanceAfter
           );
 
-          // assert(tokenBalanceAfter > tokenBalanceBefore);
+          assert.notEqual(
+            tokenBalanceAfter.toString(),
+            tokenBalanceBefore.toString()
+          );
         });
       });
 
