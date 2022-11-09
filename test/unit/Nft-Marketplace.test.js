@@ -41,18 +41,20 @@ const { developmentChains } = require("../../helper-hardhat-config");
       });
 
       describe("listItem", function () {
-        it("emits an event after listing an item", async function () {
-          expect(
-            await nftMarketplace.listItem(IpfsNft.address, tokenId, "10")
-          ).to.emit("ItemAdded");
-        });
-
         it("price should be above zero", async function () {
           await expect(
             nftMarketplace.listItem(IpfsNft.address, tokenId, "0")
           ).to.be.revertedWith("Marketplace__PriceShouldBeAboveZero");
         });
 
+        it("emits an event after listing an item", async function () {
+          expect(
+            await nftMarketplace.listItem(IpfsNft.address, tokenId, "10")
+          ).to.emit("ItemAdded");
+        });
+      });
+
+      describe("updateItem", function (){
         it("Updates listing with seller and price", async function () {
           const newPrice = "10000";
           await nftMarketplace.listItem(IpfsNft.address, tokenId, "1");
@@ -61,7 +63,7 @@ const { developmentChains } = require("../../helper-hardhat-config");
             await nftMarketplace.updateItem(IpfsNft.address, tokenId, newPrice)
           ).to.emit("ItemAdded");
         });
-      });
+      })
 
       describe("cancelListing", function () {
         it("reverts if there is no listing", async function () {
