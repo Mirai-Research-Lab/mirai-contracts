@@ -28,10 +28,8 @@ const charTokenURIs = [
   "https://ipfs.io/ipfs/QmcmUUQ1KPWtdzKJTaFFg5Y56wxWZRMiC1dapysW6grRe7",
   "https://ipfs.io/ipfs/QmcmUUQ1KPWtdzKJTaFFg5Y56wxWZRMiC1dapysW6grRe7",
 ];
-const frontEndContractsFile = "./constants/networkMapping1.json";
-const frontEndContractsFile2 = "./constants/networkMapping2.json";
-const frontEndAbiLocation = "./constants/frontEndAbiLocation1/";
-const frontEndAbiLocation2 = "./constants/frontEndAbiLocation2/";
+const frontEndContractsFile = "../../constants/networkMapping.json";
+const frontEndAbiLocation = "../../constants/frontEndAbiLocation/";
 
 const developmentChains = ["hardhat", "localhost"];
 module.exports = {
