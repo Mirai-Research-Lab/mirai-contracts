@@ -31,6 +31,7 @@ contract GameContract {
         uint256 indexed tokenAmountBought
     );
     event WinnersPaid(address[] indexed winners, uint256[] indexed prizes);
+    event DonationReceived(address indexed signer, uint256 indexed amount);
     // Errors
     error GameContract__PlayerAlreadyExists();
     error GameContract__NotEnoughTokens(address signer);
@@ -140,6 +141,8 @@ contract GameContract {
         if (msg.value == 0) {
             revert GameContract__NoEthSent();
         }
+
+        emit DonationReceived(msg.sender, msg.value);
     }
 
     // Getter functions

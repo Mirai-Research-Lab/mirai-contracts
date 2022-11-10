@@ -119,10 +119,6 @@ const {
             .getBalance(player1.address)
             .toString();
 
-          const ownerBalanceBefore = (
-            await ethers.provider.getBalance(deployer.address)
-          ).toString();
-
           const tx = await game.distributeToken(
             player1.address,
             player2.address,
@@ -136,20 +132,6 @@ const {
           const ownerBalanceAfter = (
             await ethers.provider.getBalance(deployer.address)
           ).toString();
-
-          console.log(
-            "player1 balance before",
-            tokenBalanceBefore,
-            "\nafter",
-            tokenBalanceAfter
-          );
-
-          console.log(
-            "owner balance before",
-            ownerBalanceBefore,
-            "\nafter",
-            ownerBalanceAfter
-          );
 
           assert.notEqual(
             tokenBalanceAfter.toString(),
@@ -183,6 +165,14 @@ const {
           assert.equal(
             tokenSupply.toString(),
             TOKEN_AMOUNT_GIVEN_TO_PLAYER * TOKEN_DECIMALS
+          );
+        });
+      });
+
+      describe("Donations", () => {
+        it("emits event on donation", async () => {
+          expect(await game.fundContract({ value: ETH })).to.emit(
+            "DonationReceived"
           );
         });
       });
