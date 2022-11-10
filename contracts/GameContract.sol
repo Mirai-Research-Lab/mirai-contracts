@@ -135,6 +135,13 @@ contract GameContract {
         emit WinnersPaid(addresses, prizes);
     }
 
+    /// @dev For donations
+    function fundContract() public payable {
+        if (msg.value == 0) {
+            revert GameContract__NoEthSent();
+        }
+    }
+
     // Getter functions
     function getPlayerInfo(address signer)
         public
