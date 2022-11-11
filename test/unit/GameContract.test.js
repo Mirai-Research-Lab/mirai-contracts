@@ -61,13 +61,14 @@ const {
       describe("buyToken", function () {
         it("price should be above zero", async function () {
           const TOKEN_TO_BUY = ethers.utils.parseEther("0");
+          console.log((await game.getTokenOf(game.address)).toString());
           await expect(
             game.buyToken(user.address, { value: TOKEN_TO_BUY })
           ).to.be.revertedWith("GameContract__NoEthSent");
         });
 
         it("should buy token", async function () {
-          const TOKEN_TO_BUY = ethers.utils.parseEther("1");
+          const TOKEN_TO_BUY = ethers.utils.parseEther("4000");
 
           expect(
             await game.buyToken(user.address, { value: TOKEN_TO_BUY })
