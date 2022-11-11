@@ -89,7 +89,7 @@ contract GameContract {
 
     function buyToken(address signer) public payable {
         uint256 ethPerUsd = msg.value.getConversionRate(s_priceFeed);
-        uint256 tokenToTransfer = (ethPerUsd * msg.value) / DECIMALS;
+        uint256 tokenToTransfer = (ethPerUsd * msg.value * (10**10)) / DECIMALS;
         console.log("TokenToTransfer", tokenToTransfer);
         console.log("Msg.value", msg.value);
         if (tokenToTransfer == 0) {

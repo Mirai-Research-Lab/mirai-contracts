@@ -18,7 +18,7 @@ const {
         player2,
         player3;
 
-      const ETH = ethers.utils.parseEther("1");
+      const ETH = ethers.utils.parseEther("0.00000000001");
       const TOKEN_DECIMALS = 10 ** DECIMALS;
 
       beforeEach(async () => {
@@ -68,7 +68,7 @@ const {
         });
 
         it("should buy token", async function () {
-          const TOKEN_TO_BUY = ethers.utils.parseEther("4000");
+          const TOKEN_TO_BUY = ethers.utils.parseEther("0.000000000000001");
 
           expect(
             await game.buyToken(user.address, { value: TOKEN_TO_BUY })
@@ -76,7 +76,7 @@ const {
         });
 
         it("should update token balance", async function () {
-          const TOKEN_TO_BUY = ethers.utils.parseEther("1");
+          const TOKEN_TO_BUY = ethers.utils.parseEther("0.00000000000001");
           const buyTx = await game.buyToken(user.address, {
             value: TOKEN_TO_BUY,
           });
@@ -123,7 +123,7 @@ const {
 
           // transfer 50 eth to game contract
           await game.buyToken(deployer.address, {
-            value: ethers.utils.parseEther("50"),
+            value: ethers.utils.parseEther("0.000000000000005"),
           });
 
           const gameContractBalance = await ethers.provider.getBalance(
