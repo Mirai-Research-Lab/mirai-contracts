@@ -201,6 +201,14 @@ const {
           );
         });
       });
+
+      describe("Donations", () => {
+        it("emits event on donation", async () => {
+          expect(await game.fundContract({ value: ETH })).to.emit(
+            "DonationReceived"
+          );
+        });
+      });
     });
 
 // Total Token Supply : 100000000000000000000000000000000000000
