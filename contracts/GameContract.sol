@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 import "./MiraiToken.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "./PriceConvertor.sol";
+import "hardhat/console.sol";
 
 contract GameContract {
     using PriceConverter for uint256;
@@ -54,7 +55,7 @@ contract GameContract {
         i_tokenNeededToPlay = tokenNeededToPlay * DECIMALS;
         s_priceFeed = AggregatorV3Interface(priceFeed);
         s_numberOfPlayers = 0;
-        s_token = new MiraiToken(i_initialTokenSupply * DECIMALS);
+        s_token = new MiraiToken(initialTokenSupply * DECIMALS);
     }
 
     // Main functions
@@ -83,7 +84,10 @@ contract GameContract {
     }
 
     function buyToken(address signer) public payable {
-        uint256 tokenToTransfer = msg.value.getConversionRate(s_priceFeed);
+        uint256 ethPerUsd = msg.value.getConversionRate(s_priceFeed);
+        uint256 tokenToTransfer = (ethPerUsd * msg.value) / DECIMALS;
+        console.log("TokenToTransfer", tokenToTransfer);
+        console.log("Msg.value", msg.value);
         if (tokenToTransfer == 0) {
             revert GameContract__NoEthSent();
         }
@@ -91,8 +95,7 @@ contract GameContract {
         s_token.transferFrom(address(this), signer, tokenToTransfer);
         s_addressToToken[signer].tokenAmount =
             s_addressToToken[signer].tokenAmount +
-            tokenToTransfer *
-            DECIMALS;
+            tokenToTransfer;
         emit TokenBought(signer, tokenToTransfer);
     }
 
