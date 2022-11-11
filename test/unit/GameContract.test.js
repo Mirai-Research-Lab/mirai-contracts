@@ -86,7 +86,21 @@ const {
           // assert(balance == TOKEN_TO_BUY * TOKEN_DECIMALS);
         });
       });
-
+      describe("burn", function () {
+        it("should burn token when played", async function () {
+          await game.signIn(player1.address);
+          const tokenBalanceBefore = await game.getTokenOf(player1.address);
+          console.log("Token Balance Before", tokenBalanceBefore.toString());
+          const tx = await game.burn(player1.address);
+          const txReceipt = await tx.wait(1);
+          const tokenBalanceAfter = await game.getTokenOf(player1.address);
+          console.log("Token Balance After", tokenBalanceAfter.toString());
+          assert.notEqual(
+            tokenBalanceBefore.toString(),
+            tokenBalanceAfter.toString()
+          );
+        });
+      });
       describe("playGame", function () {
         it("should play game", async function () {
           await game.signIn(player1.address);
@@ -120,6 +134,10 @@ const {
             .getBalance(player1.address)
             .toString();
 
+          const ownerBalanceBefore = (
+            await ethers.provider.getBalance(deployer.address)
+          ).toString();
+
           const tx = await game.distributeToken(
             player1.address,
             player2.address,
@@ -133,6 +151,20 @@ const {
           const ownerBalanceAfter = (
             await ethers.provider.getBalance(deployer.address)
           ).toString();
+
+          console.log(
+            "player1 balance before",
+            tokenBalanceBefore,
+            "\nafter",
+            tokenBalanceAfter
+          );
+
+          console.log(
+            "owner balance before",
+            ownerBalanceBefore,
+            "\nafter",
+            ownerBalanceAfter
+          );
 
           assert.notEqual(
             tokenBalanceAfter.toString(),
@@ -166,14 +198,6 @@ const {
           assert.equal(
             tokenSupply.toString(),
             TOKEN_AMOUNT_GIVEN_TO_PLAYER * TOKEN_DECIMALS
-          );
-        });
-      });
-
-      describe("Donations", () => {
-        it("emits event on donation", async () => {
-          expect(await game.fundContract({ value: ETH })).to.emit(
-            "DonationReceived"
           );
         });
       });
