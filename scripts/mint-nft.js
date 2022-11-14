@@ -2,7 +2,7 @@ const { ethers, network } = require("hardhat");
 const { moveBlocks } = require("../utils/move-blocks");
 
 async function mint() {
-  const IpfsNft = await ethers.getContract("IpfsNft");
+  const IpfsNft = await ethers.getContract("IpfsNFT");
   console.log("Minting NFT...");
   const mintTx = await IpfsNft.requestNft();
   const mintTxReceipt = await mintTx.wait(1);
