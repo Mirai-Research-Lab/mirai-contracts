@@ -70,4 +70,11 @@ async function updateContractAddresses() {
   fs.writeFileSync(frontEndContractsFile, JSON.stringify(contractAddresses));
 }
 
-module.exports.tags = ["all", "frontend", "main"];
+module.exports.tags = [
+  "all",
+  "frontend",
+  "main",
+  "marketplace",
+  "game",
+  "ipfs",
+];
