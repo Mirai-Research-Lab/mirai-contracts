@@ -2,9 +2,13 @@ const { ethers, network } = require("hardhat");
 const { moveBlocks } = require("../utils/move-blocks");
 
 async function mint() {
-  const IpfsNft = await ethers.getContract("IpfsNft");
+  const owner = await ethers.getSigners()[0];
+
+  const IpfsNft = await ethers.getContract("IpfsNFT");
+
+  IpfsNft.connect(owner);
   console.log("Minting NFT...");
-  const mintTx = await IpfsNft.requestNft();
+  const mintTx = await IpfsNft.staticMint({ gasLimit: 1000000 });
   const mintTxReceipt = await mintTx.wait(1);
 
   console.log(

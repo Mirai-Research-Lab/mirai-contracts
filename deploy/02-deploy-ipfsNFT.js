@@ -52,6 +52,7 @@ module.exports = async function ({ getNamedAccounts, deployments }) {
     vrfCoordinatorV2Address,
     subscriptionId,
     networkConfig[chainId].gasLane,
+    networkConfig[chainId].gasLane,
     networkConfig[chainId].callbackGasLimit,
     tokenUris.length,
     tokenUris,

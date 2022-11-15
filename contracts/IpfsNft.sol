@@ -18,6 +18,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
     bytes32 private immutable i_gasLane;
     uint32 private immutable i_callbackGasLimit;
     uint16 private immutable i_maxNFT;
+    bytes private i_seed;
     uint16 private constant REQUEST_CONFIRMATIONS = 1;
     uint32 private constant NUM_WORDS = 1;
     uint256 private s_moddedRng;
@@ -43,6 +44,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         address vrfCoordinatorV2Address,
         uint64 subscriptionId,
         bytes32 gasLane,
+        bytes memory seed,
         uint32 callbackGasLimit,
         uint16 maxNFT,
         string[36] memory charTokenURIs
@@ -54,6 +56,7 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         i_subscriptionId = subscriptionId;
         i_callbackGasLimit = callbackGasLimit;
         i_gasLane = gasLane;
+        i_seed = seed;
         i_maxNFT = maxNFT;
         s_tokenCounter = 0;
         s_TokenURIs = charTokenURIs;
@@ -77,12 +80,15 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
         emit Nft_Requested(tokenId, msg.sender, requestId);
     }
 
-    function staticMint() internal {
+    function staticMint() public returns (uint256) {
         uint256 tokenId = s_tokenCounter;
         _safeMint(msg.sender, tokenId);
-        _setTokenURI(tokenId, s_TokenURIs[0]);
+        _setTokenURI(tokenId, s_TokenURIs[uint(keccak256(i_seed)) % i_maxNFT]);
+        // _setTokenURI(tokenId, s_TokenURIs[0]);
         s_tokenCounter++;
-        // emit Nft_Requested(tokenId, msg.sender);
+        emit Nft_Minted(msg.sender, tokenId);
+
+        return tokenId;
     }
 
     function fulfillRandomWords(uint256 requestId, uint256[] memory randomWords)
