@@ -4,28 +4,29 @@ const { moveBlocks } = require("../utils/move-blocks");
 const PRICE = ethers.utils.parseEther("0.01");
 
 async function mintAndList() {
+  const owner = await ethers.getSigners()[0];
+
   const nftMarketplace = await ethers.getContractAt(
     "Marketplace",
-    "0x0f5bb242f5F060eE2B5ba1a0f129d5c04A07a454"
+    "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
   );
   let VRFCoordinatorV2Mock;
   if (network.config.chainId == 31337)
-    VRFCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
+    VRFCoordinatorV2Mock = await ethers.getContractAt(
+      "VRFCoordinatorV2Mock",
+      "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+    );
   const IpfsNft = await ethers.getContractAt(
     "IpfsNFT",
-    "0x7CcD0efe93F18ABC3c9C8b394409426528409954"
+    "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
   );
-  console.log("Minting NFT...");
-  const mintTx = await IpfsNft.requestNft({ gasLimit: 100000 });
-  const mintTxReceipt = await mintTx.wait(1);
-  const tokenId = mintTxReceipt.events[1].args[0].toString();
+  IpfsNft.connect(owner);
 
-  if (network.config.chainId == 31337) {
-    await VRFCoordinatorV2Mock.fulfillRandomWords(
-      mintTxReceipt.events[1].args[2],
-      IpfsNft.address
-    );
-  }
+  console.log("Minting NFT...");
+  const mintTx = await IpfsNft.staticMint({ gasLimit: 1000000 });
+  const mintTxReceipt = await mintTx.wait(1);
+  const tokenId = mintTxReceipt.events[1].args[1].toString();
+
   console.log("Approving NFT...");
   const approvalTx = await IpfsNft.approve(nftMarketplace.address, tokenId, {
     gasLimit: 100000,
