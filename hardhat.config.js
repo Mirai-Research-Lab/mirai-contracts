@@ -17,6 +17,8 @@ const MAINNET_RPC_URL =
 const GOERLI_RPC_URL =
   process.env.GOERLI_RPC_URL ||
   "https://eth-goerli.alchemyapi.io/v2/your-api-key";
+const POLYGON_RPC_URL =
+  process.env.POLYGON_RPC_URL || "https://rpc-mainnet.maticvigil.com/";
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const MNEMONIC = process.env.MNEMONIC || "";
 
@@ -54,12 +56,19 @@ module.exports = {
       saveDeployments: true,
       chainId: 1,
     },
+    polygon: {
+      url: POLYGON_RPC_URL,
+      accounts: PRIVATE_KEY !== undefined ? [PRIVATE_KEY] : [],
+      saveDeployments: true,
+      chainId: 80001,
+    },
   },
   etherscan: {
     // npx hardhat verify --network <NETWORK> <CONTRACT_ADDRESS> <CONSTRUCTOR_PARAMETERS>
     apiKey: {
       goerli: ETHERSCAN_API_KEY,
       polygon: POLYGONSCAN_API_KEY,
+      polygonMumbai: POLYGONSCAN_API_KEY,
     },
   },
   gasReporter: {
