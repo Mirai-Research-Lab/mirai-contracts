@@ -37,4 +37,29 @@ const tokenURIs = [
   "ipfs://QmcdPLSLs6YqBoLEGRmyacWv3e1dJhLCfuuhHGXAevXFXW",
 ];
 
+const tokenURI_NFT_STORAGE = {
+  responses: [
+    "ipfs://bafyreifjtammrkw3seaxsoc36jo6q7k7d4l5mbrgucpr4i4dsq74xzrcv4/metadata.json",
+    "ipfs://bafyreicgu2iay6x4itrbv2ssjazgzso3xpr32vqtf6s5fpbz6doz5i3emq/metadata.json",
+    "ipfs://bafyreicqg32q2emaymq4xdmnnw6cgzihkd7paetgcmvatuk4455wkb2nau/metadata.json",
+  ],
+  files: ["hououin.png", "metal_oopa.jpg", "metal_oopa_colourful.jpg"],
+};
+
 module.exports = { tokenURIs };
+
+// Uploading hououin.png...
+// Token {
+//   ipnft: 'bafyreievhpumntoifead4shpe677qxy6jdwxpkspvckfi5xq3iitxunsyi',
+//   url: 'ipfs://bafyreievhpumntoifead4shpe677qxy6jdwxpkspvckfi5xq3iitxunsyi/metadata.json'
+// }
+// Uploading metal_oopa.jpg...
+// Token {
+//   ipnft: 'bafyreidfxcn4t22tua65bzfe7qb4ck5qh4kf3eyes64piqppj64ztwasqa',
+//   url: 'ipfs://bafyreidfxcn4t22tua65bzfe7qb4ck5qh4kf3eyes64piqppj64ztwasqa/metadata.json'
+// }
+// Uploading metal_oopa_colourful.jpg...
+// Token {
+//   ipnft: 'bafyreighqlo6btrbrf23wi7ttcnvqj4naoq3234whs4sysypbxtrl2lhea',
+//   url: 'ipfs://bafyreighqlo6btrbrf23wi7ttcnvqj4naoq3234whs4sysypbxtrl2lhea/metadata.json'
+// }

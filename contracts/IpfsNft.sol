@@ -82,9 +82,17 @@ contract IpfsNFT is VRFConsumerBaseV2, ERC721URIStorage, Ownable {
 
     function staticMint() public returns (uint256) {
         uint256 tokenId = s_tokenCounter;
+        uint256 moddedRng = uint(
+            keccak256(
+                abi.encodePacked(
+                    block.difficulty,
+                    block.timestamp,
+                    s_tokenCounter
+                )
+            )
+        ) % i_maxNFT;
         _safeMint(msg.sender, tokenId);
-        _setTokenURI(tokenId, s_TokenURIs[uint(keccak256(i_seed)) % i_maxNFT]);
-        // _setTokenURI(tokenId, s_TokenURIs[0]);
+        _setTokenURI(tokenId, s_TokenURIs[moddedRng]);
         s_tokenCounter++;
         emit Nft_Minted(msg.sender, tokenId);
 

@@ -6,8 +6,8 @@ const PRICE = ethers.utils.parseEther("0.01");
 async function mintAndList() {
   const nftMarketplace = await ethers.getContract("Marketplace");
   let VRFCoordinatorV2Mock;
-  if (network.config.chainId == 31337)
-    VRFCoordinatorV2Mock = await ethers.getContract("VRFCoordinatorV2Mock");
+  // if (network.config.chainId == 31337)
+  // VRFCoordinatorV2Mock = await ethers.getContractAt("VRFCoordinatorV2Mock");
   const IpfsNft = await ethers.getContract("IpfsNFT");
 
   console.log("Minting NFT...");
@@ -24,7 +24,9 @@ async function mintAndList() {
   await approvalTx.wait(1);
 
   console.log("Listing NFT...");
-  const tx = await nftMarketplace.listItem(IpfsNft.address, tokenId, PRICE);
+  const tx = await nftMarketplace.listItem(IpfsNft.address, tokenId, PRICE, {
+    gasLimit: 1000000,
+  });
   await tx.wait(1);
   console.log("NFT Listed!");
 
