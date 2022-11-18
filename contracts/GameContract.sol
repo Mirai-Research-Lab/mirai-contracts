@@ -139,6 +139,15 @@ contract GameContract {
     emit DonationReceived(msg.sender, msg.value);
   }
 
+  // fallback function
+  fallback() external payable {
+    fundContract();
+  }
+
+  receive() external payable {
+    fundContract();
+  }
+
   // Getter functions
   function getPlayerInfo(
     address signer
