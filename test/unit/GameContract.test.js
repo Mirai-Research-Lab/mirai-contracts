@@ -108,11 +108,11 @@ const {
           await game.signIn(player3.address);
 
           expect(
-            await game.distributeToken(
+            await game.distributeToken([
               player1.address,
               player2.address,
-              player3.address
-            )
+              player3.address,
+            ])
           ).to.emit("WinnersPaid");
         });
 
@@ -138,11 +138,11 @@ const {
             await ethers.provider.getBalance(deployer.address)
           ).toString();
 
-          const tx = await game.distributeToken(
+          const tx = await game.distributeToken([
             player1.address,
             player2.address,
-            player3.address
-          );
+            player3.address,
+          ]);
           const receipt = await tx.wait(1);
 
           const tokenBalanceAfter = (
