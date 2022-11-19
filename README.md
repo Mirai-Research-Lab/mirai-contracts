@@ -5,8 +5,9 @@
 ### The contracts are deployed on the Ethereum Goerli testnet and the Polygon Mumbai testnet.
 
 ---
-## OVERVIEW:
-We have four contracts that we have created in order to interact with the blockchain and apply DeFi to our project. We are using ERC20 token (MIRAI Token/MRI in our projcet) as in game currency. Also We are using ERC721 tokens to reward the winners of each day of our game. We are generating these ERC721 tokens/NFTs randomly using keccak algorithm. (At first we though about using Chainlink vrfCoordinator, but after several design meetings we decided not to use it as we didn't really need completely non deterministic random numbers to generate NFTs randomly). The NFT images are generated using OpenAI and then we have associated meta-data with the images and uploaded them to IPFS using Pinata and Filecoin. 
+### OVERVIEW      
+---
+We have four contracts that we have created in order to interact with the blockchain and apply DeFi to our project. We are using ERC20 token (MIRAI Token/MRI in our projcet) as in game currency. Also We are using ERC721 tokens to reward the winners of each day of our game. We are generating these ERC721 tokens/NFTs randomly using keccak algorithm. (At first we though about using Chainlink vrfCoordinator, but after several design meetings we decided not to use it as we didn't really need completely non deterministic random numbers to generate NFTs randomly). The NFT images are generated using OpenAI and then we have associated meta-data with the images and uploaded them to IPFS using Pinata and Filecoin.
 ---
 ### To deploy and run the contract functions locally:
 
